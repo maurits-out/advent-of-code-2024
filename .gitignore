@@ -1,0 +1,40 @@
+# General system files
+.DS_Store
+Thumbs.db
+
+# IDE and editor files
+.idea/
+*.iml
+.vscode/
+*.swp
+*.swo
+
+# Leiningen files (if applicable)
+target/
+*.jar
+*.class
+*.war
+
+# Clojure CLI cache and logs
+.clj-kondo/
+.nrepl-port
+.lsp/
+.cpcache/
+
+# Dependencies and build artifacts
+lib/
+classes/
+
+# Temporary files
+*.log
+*.tmp
+*.bak
+*~
+
+# Output of benchmarking or testing
+benchmark-results/
+test-output/
+
+# OS-specific files
+*.~lock*
+._*
