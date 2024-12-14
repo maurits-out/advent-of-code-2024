@@ -23,9 +23,8 @@
     (and (= acc test-value) (empty? numbers)) true
     (empty? numbers) false
     :else (let [[number & remaining] numbers]
-            (first (filter identity (map
-                                      (fn [op] (can-be-true? (op acc number) remaining test-value ops))
-                                      ops))))))
+            (not-empty
+              (filter identity (map (fn [op] (can-be-true? (op acc number) remaining test-value ops)) ops))))))
 
 (defn sum-of-valid-equations [equations ops]
   (->> (filter (fn [{:keys [test-value numbers]}] (can-be-true? (first numbers) (rest numbers) test-value ops)) equations)
