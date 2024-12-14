@@ -1,6 +1,7 @@
 (ns day06.core
   (:require [clojure.java.io :as io]
-            [clojure.string :as string]))
+            [clojure.string :as string]
+            [criterium.core :as crit]))
 
 (defn find-guard-position [puzzle-map]
   (some (fn [[row-idx row]]
@@ -17,7 +18,7 @@
         guard-position (find-guard-position puzzle-map)]
     {:puzzle-map puzzle-map :guard-position guard-position}))
 
-(defn next-location [[row column] direction]
+(defn move [[row column] direction]
   (case direction
     :up [(dec row) column]
     :down [(inc row) column]
@@ -35,12 +36,43 @@
   (loop [direction :up
          location guard-position
          visited #{guard-position}]
-    (let [next (next-location location direction)]
-      (case (get-in puzzle-map next)
+    (let [next-location (move location direction)]
+      (case (get-in puzzle-map next-location)
         nil (count visited)
         \# (recur (turn-right direction) location visited)
-        (recur direction next (conj visited next))))))
+        (recur direction next-location (conj visited next-location))))))
+
+(defn candidate-locations [puzzle-map]
+  (mapcat
+    (fn [[row-idx row]]
+      (keep-indexed
+        (fn [col-idx char]
+          (when (= char \.)
+            [row-idx col-idx]))
+        row))
+    (map-indexed vector puzzle-map)))
+
+(defn next-state [puzzle-map [location direction]]
+  (let [next-location (move location direction)]
+    (if (= (get-in puzzle-map next-location) \#)
+      [location (turn-right direction)]
+      [next-location direction])))
+
+(defn is-loop? [puzzle-map guard-position]
+  (loop [state [guard-position :up]
+         visited #{}]
+    (cond
+      (visited state) true
+      (not (get-in puzzle-map (first state))) false
+      :else (recur (next-state puzzle-map state) (conj visited state)))))
+
+(defn part2 [{:keys [puzzle-map guard-position]}]
+  (->> (candidate-locations puzzle-map)
+       (map #(assoc-in puzzle-map % \#))
+       (filter #(is-loop? % guard-position))
+       (count)))
 
 (defn -main []
   (let [input (parse-input)]
-    (println "Part 1:" (part1 input))))
+    (println "Part 1:" (part1 input))
+    (println "Part 2:" (crit/quick-bench (part2 input) :verbose))))
