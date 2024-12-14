@@ -1,4 +1,4 @@
-(ns day05.core
+(ns day05.print-queue
   (:require [clojure.java.io :as io]
             [clojure.string :as string]
             [clojure.set :as set]))

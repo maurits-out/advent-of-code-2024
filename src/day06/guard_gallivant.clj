@@ -1,4 +1,4 @@
-(ns day06.core
+(ns day06.guard-gallivant
   (:require [clojure.java.io :as io]
             [clojure.string :as string]))
 
@@ -74,4 +74,4 @@
 (defn -main []
   (let [input (parse-input)]
     (println "Part 1:" (part1 input))
-    (println "Part 2:" (part2 input) :verbose)))
+    (println "Part 2:" (part2 input)))

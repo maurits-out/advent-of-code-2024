@@ -1,4 +1,4 @@
-(ns day01.core
+(ns day01.historian-hysteria
   (:require [clojure.java.io :as io]
             [clojure.string :as string]))
 

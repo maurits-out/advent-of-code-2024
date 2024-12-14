@@ -1,4 +1,4 @@
-(ns day04.core
+(ns day04.ceres-search
   (:require [clojure.java.io :as io]
             [clojure.string :as string]))
 

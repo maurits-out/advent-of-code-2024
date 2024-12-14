@@ -1,4 +1,4 @@
-(ns day08.core
+(ns day08.resonant_collinearity
   (:require [clojure.java.io :as io]
             [clojure.string :as string]))
 
@@ -23,7 +23,7 @@
 (defn is-within-bounds? [[row column] height width]
   (and (<= 0 row (dec height)) (<= 0 column (dec width))))
 
-(defn anti-node [[row1 col1] [row2 col2] height width]
+(defn anti-node-from-antennas [[row1 col1] [row2 col2] height width]
   (let [anti-node [(- (* 2 row2) row1) (- (* 2 col2) col1)]]
     (when (is-within-bounds? anti-node height width)
       anti-node)))
@@ -32,7 +32,7 @@
   (->> (for [from coordinates
              to coordinates
              :when (not= from to)]
-         (anti-node from to height width))
+         (anti-node-from-antennas from to height width))
        (filter identity)))
 
 (defn part1 [{:keys [height width antennas]}]

@@ -1,4 +1,4 @@
-(ns day07.core
+(ns day07.bridge-repair
   (:require [clojure.java.io :as io]
             [clojure.math :as math]
             [clojure.string :as string]))

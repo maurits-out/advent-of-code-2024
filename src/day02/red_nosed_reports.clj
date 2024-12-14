@@ -1,4 +1,4 @@
-(ns day02.core
+(ns day02.red-nosed-reports
   (:require [clojure.java.io :as io]
             [clojure.string :as string]))
 

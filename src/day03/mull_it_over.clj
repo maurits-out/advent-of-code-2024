@@ -1,4 +1,4 @@
-(ns day03.core
+(ns day03.mull-it-over
   (:require [clojure.java.io :as io]))
 
 (defn part1 [memory]
