@@ -1,7 +1,7 @@
 (ns day07.core
   (:require [clojure.java.io :as io]
-            [clojure.string :as string]
-            [clojure.math :as math]))
+            [clojure.math :as math]
+            [clojure.string :as string]))
 
 (defn parse-line [line]
   (let [parts (string/split line #":? ")
@@ -15,33 +15,24 @@
 
 (defn concatenate [a b]
   (let [num-digits (int (inc (math/log10 b)))]
-    (+ (reduce (fn [acc _] (* acc 10)) a (range num-digits)) b)))
+    (+ (* a (int (math/pow 10 num-digits))) b)))
 
-(defn can-be-true-part1? [acc numbers test-value]
+(defn can-be-true? [acc numbers test-value ops]
   (cond
     (> acc test-value) false
     (and (= acc test-value) (empty? numbers)) true
     (empty? numbers) false
     :else (let [[number & remaining] numbers]
-            (or (can-be-true-part1? (* acc number) remaining test-value)
-                (can-be-true-part1? (+ acc number) remaining test-value)))))
+            (first (filter identity (map
+                                      (fn [op] (can-be-true? (op acc number) remaining test-value ops))
+                                      ops))))))
 
-(defn can-be-true-part2? [acc numbers test-value]
-  (cond
-    (> acc test-value) false
-    (and (= acc test-value) (empty? numbers)) true
-    (empty? numbers) false
-    :else (let [[number & remaining] numbers]
-            (or (can-be-true-part2? (* acc number) remaining test-value)
-                (can-be-true-part2? (+ acc number) remaining test-value)
-                (can-be-true-part2? (concatenate acc number) remaining test-value)))))
-
-(defn calculate-sum-of-valid-equations [equations filter-fn]
-  (->> (filter (fn [{:keys [test-value numbers]}] (filter-fn (first numbers) (rest numbers) test-value)) equations)
+(defn sum-of-valid-equations [equations ops]
+  (->> (filter (fn [{:keys [test-value numbers]}] (can-be-true? (first numbers) (rest numbers) test-value ops)) equations)
        (map :test-value)
        (apply +)))
 
 (defn -main []
   (let [equations (parse-input)]
-    (println "Part 1:" (calculate-sum-of-valid-equations equations can-be-true-part1?))
-    (println "Part 2:" (calculate-sum-of-valid-equations equations can-be-true-part2?))))
+    (println "Part 1:" (sum-of-valid-equations equations [+ *]))
+    (println "Part 2:" (sum-of-valid-equations equations [+ * concatenate]))))
