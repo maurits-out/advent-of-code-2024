@@ -1,7 +1,6 @@
 (ns day06.core
   (:require [clojure.java.io :as io]
-            [clojure.string :as string]
-            [criterium.core :as crit]))
+            [clojure.string :as string]))
 
 (defn find-guard-position [puzzle-map]
   (some (fn [[row-idx row]]
@@ -75,4 +74,4 @@
 (defn -main []
   (let [input (parse-input)]
     (println "Part 1:" (part1 input))
-    (println "Part 2:" (crit/quick-bench (part2 input) :verbose))))
+    (println "Part 2:" (part2 input) :verbose)))
