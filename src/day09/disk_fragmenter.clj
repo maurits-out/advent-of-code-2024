@@ -16,17 +16,9 @@
          free-space? false
          result []]
     (if-let [current (first remaining)]
-      (cond
-        free-space? (recur
-                      (rest remaining)
-                      file-id
-                      false
-                      (into result (repeat current nil)))
-        :else (recur
-                (rest remaining)
-                (inc file-id)
-                true
-                (into result (repeat current file-id))))
+      (if free-space?
+        (recur (rest remaining) file-id false (into result (repeat current nil)))
+        (recur (rest remaining) (inc file-id) true (into result (repeat current file-id))))
       result)))
 
 (defn part1 [input]
