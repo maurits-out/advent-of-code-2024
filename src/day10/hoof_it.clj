@@ -26,19 +26,35 @@
         [row-idx (dec col-idx)]]
        (filter #(= (get-in topographic-map %) height))))
 
-(defn follow-trail [topographic-map location]
+(defn follow-trail-part1 [topographic-map location]
   (let [height (get-in topographic-map location)]
     (if (= height 9)
       #{location}
       (let [next-locations (get-next-locations topographic-map location (inc height))]
-        (apply set/union (map #(follow-trail topographic-map %) next-locations))))))
+        (apply set/union
+               (map #(follow-trail-part1 topographic-map %) next-locations))))))
 
 (defn part1 [topographic-map start-locations]
-  (->> (map #(follow-trail topographic-map %) start-locations)
+  (->> (map #(follow-trail-part1 topographic-map %) start-locations)
+       (map count)
+       (apply +)))
+
+(defn follow-trail-part2 [topographic-map path]
+  (let [current (first path)
+        height (get-in topographic-map current)]
+    (if (= height 9)
+      #{path}
+      (let [locations (get-next-locations topographic-map current (inc height))]
+        (apply set/union
+               (map (fn [location] (follow-trail-part2 topographic-map (conj path location))) locations))))))
+
+(defn part2 [topographic-map start-locations]
+  (->> (map (fn [location] (follow-trail-part2 topographic-map (list location))) start-locations)
        (map count)
        (apply +)))
 
 (defn -main []
   (let [topographic-map (parse-input)
         start-locations (find-lowest-locations topographic-map)]
-    (println "Part 1:" (part1 topographic-map start-locations))))
+    (println "Part 1:" (part1 topographic-map start-locations))
+    (println "Part 2:" (part2 topographic-map start-locations))))
