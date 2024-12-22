@@ -69,9 +69,8 @@
           (recur
             (rest files)
             (+ checksum (checksum-for-file (assoc file :offset (get-in free-space-blocks [idx :offset]))))
-            (update free-space-blocks idx (fn [block] (-> block
-                                                          (update :size #(- % (file :size)))
-                                                          (update :offset #(+ % (file :size))))))
+            (update free-space-blocks idx
+                    (fn [block] {:offset (+ (block :offset) (file :size)) :size (- (block :size) (file :size))}))
             (assoc start-at (file :size) idx))
           (recur
             (rest files)
