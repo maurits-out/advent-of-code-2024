@@ -46,10 +46,10 @@
       #{path}
       (let [locations (get-next-locations topographic-map current (inc height))]
         (apply set/union
-               (map (fn [location] (follow-trail-part2 topographic-map (conj path location))) locations))))))
+               (map #(follow-trail-part2 topographic-map (conj path %)) locations))))))
 
 (defn part2 [topographic-map start-locations]
-  (->> (map (fn [location] (follow-trail-part2 topographic-map (list location))) start-locations)
+  (->> (map #(follow-trail-part2 topographic-map (list %)) start-locations)
        (map count)
        (apply +)))
 
