@@ -26,13 +26,13 @@
         [row-idx (dec col-idx)]]
        (filter #(= (get-in topographic-map %) height))))
 
-(defn follow-trail-part1 [topographic-map location]
-  (let [height (get-in topographic-map location)]
+(defn follow-trail-part1 [topographic-map current]
+  (let [height (get-in topographic-map current)]
     (if (= height 9)
-      #{location}
-      (let [next-locations (get-next-locations topographic-map location (inc height))]
+      #{current}
+      (let [locations (get-next-locations topographic-map current (inc height))]
         (apply set/union
-               (map #(follow-trail-part1 topographic-map %) next-locations))))))
+               (map #(follow-trail-part1 topographic-map %) locations))))))
 
 (defn part1 [topographic-map start-locations]
   (->> (map #(follow-trail-part1 topographic-map %) start-locations)
