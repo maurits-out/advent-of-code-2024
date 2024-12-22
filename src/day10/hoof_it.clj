@@ -43,10 +43,9 @@
   (let [current (first path)
         height (get-in topographic-map current)]
     (if (= height 9)
-      #{path}
+      [path]
       (let [locations (get-next-locations topographic-map current (inc height))]
-        (apply set/union
-               (map #(follow-trail-part2 topographic-map (conj path %)) locations))))))
+        (mapcat identity (mapv #(follow-trail-part2 topographic-map (conj path %)) locations))))))
 
 (defn part2 [topographic-map start-locations]
   (->> (map #(follow-trail-part2 topographic-map (list %)) start-locations)
