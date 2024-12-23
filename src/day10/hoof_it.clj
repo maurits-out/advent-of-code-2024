@@ -39,18 +39,17 @@
        (map count)
        (apply +)))
 
-(defn follow-trail-part2 [topographic-map path]
+(defn count-distinct-hiking-trails [topographic-map path]
   (let [current (first path)
         height (get-in topographic-map current)]
     (if (= height 9)
-      #{path}
+      1
       (let [locations (get-next-locations topographic-map current (inc height))]
-        (apply set/union
-               (map #(follow-trail-part2 topographic-map (conj path %)) locations))))))
+        (apply + (map #(count-distinct-hiking-trails topographic-map (conj path %)) locations))))))
 
 (defn part2 [topographic-map start-locations]
-  (->> (map #(follow-trail-part2 topographic-map (list %)) start-locations)
-       (map count)
+  (->> start-locations
+       (map #(count-distinct-hiking-trails topographic-map (list %)))
        (apply +)))
 
 (defn -main []
