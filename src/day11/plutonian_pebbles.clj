@@ -4,7 +4,7 @@
 (def input [5178527 8525 22 376299 3 69312 0 275])
 
 (defn split [num num-digits]
-  (let [div (int (math/pow 10 (quot num-digits 2)))]
+  (let [div (int (math/pow 10 num-digits))]
     [(quot num div) (rem num div)]))
 
 (defn digit-count [num]
@@ -16,9 +16,9 @@
                (zero? times) 1
                (zero? stone) (stone-count 1 (dec times))
                :else (let [num-digits (digit-count stone)]
-                       (if (even? num-digits)
+                       (if (odd? num-digits)
                          (stone-count (* stone 2024) (dec times))
-                         (->> (split stone num-digits)
+                         (->> (split stone (quot num-digits 2))
                               (map #(stone-count % (dec times)))
                               (apply +))))))))
 
