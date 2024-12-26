@@ -21,7 +21,7 @@
   (let [divisor (- (* a1 b2) (* a2 b1))
         x (/ (- (* b2 c1) (* b1 c2)) divisor)
         y (/ (- (* a1 c2) (* a2 c1)) divisor)]
-    (when (and (constraint-fn x) (constraint-fn y) (not (ratio? x)) (not (ratio? y)))
+    (when (and (not (ratio? x)) (not (ratio? y)) (constraint-fn x) (constraint-fn y))
       (+ (* 3 x) y))))
 
 (defn update-prize [claw-machine]
