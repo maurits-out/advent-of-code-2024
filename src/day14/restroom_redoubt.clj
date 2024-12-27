@@ -40,7 +40,7 @@
 
 (defn have-overlapping-locations [robots]
   (->> (map :p robots)
-       (distinct)
+       (into #{})
        (count)
        (not= (count robots))))
 
