@@ -33,17 +33,29 @@
      [0 (inc quadrant-height) (dec quadrant-width) (dec height)]
      [(inc quadrant-width) (inc quadrant-height) (dec width) (dec height)]]))
 
-(defn robot-count-in-quadrant [[from-x from-y to-x to-y] robot-locations]
-  (->> (map :p robot-locations)
+(defn robot-count-in-quadrant [[from-x from-y to-x to-y] robots]
+  (->> (map :p robots)
        (filter (fn [[x y]] (and (<= from-x x to-x) (<= from-y y to-y))))
        (count)))
 
+(defn have-overlapping-locations [robots]
+  (->> (map :p robots)
+       (distinct)
+       (count)
+       (not= (count robots))))
+
 (defn part1 [robots]
-  (let [robot-locations (move-robots robots 100)]
+  (let [updated-robots (move-robots robots 100)]
     (->> (calculate-quadrants)
-         (map #(robot-count-in-quadrant % robot-locations))
+         (map #(robot-count-in-quadrant % updated-robots))
          (apply *))))
+
+(defn part2 [robots]
+  (->> (iterate #(move-robots % 1) robots)
+       (take-while #(have-overlapping-locations %))
+       (count)))
 
 (defn -main []
   (let [robots (parse-input)]
-    (println "Part 1:" (part1 robots))))
+    (println "Part 1:" (part1 robots))
+    (println "Part 2:" (part2 robots))))
