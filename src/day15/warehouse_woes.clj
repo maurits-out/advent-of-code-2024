@@ -7,10 +7,6 @@
                             \v [1 0]
                             \< [0 -1]})
 
-(defn print-warehouse-map [warehouse-map]
-  (doseq [row warehouse-map]
-    (println (apply str row))))
-
 (defn parse-warehouse [warehouse]
   (->> (string/split-lines warehouse)
        (mapv #(vec %))))
@@ -22,10 +18,10 @@
 (defn parse-input []
   (let [input (slurp (io/resource "day15.txt"))
         sections (string/split input #"\n\n")]
-    {:warehouse-map (parse-warehouse (first sections))
-     :movements     (parse-movements (second sections))}))
+    {:warehouse (parse-warehouse (first sections))
+     :movements (parse-movements (second sections))}))
 
-(defn find-robot-location [warehouse-map]
+(defn find-robot [warehouse-map]
   (some (fn [[row-idx row]]
           (some (fn [[col-idx char]]
                   (when (= char \@)
@@ -36,43 +32,77 @@
 (defn update-location [[row column] [delta-row delta-column]]
   [(+ row delta-row) (+ column delta-column)])
 
-(defn can-move? [location direction warehouse-map]
+(defn is-direction-horizontal? [direction]
+  (zero? (first direction)))
+
+(defn box-locations [[row column :as location] warehouse]
+  (case (get-in warehouse location)
+    \[ [location [row (inc column)]]
+    \] [location [row (dec column)]]))
+
+(defn can-move? [location direction warehouse]
   (let [next-location (update-location location direction)]
-    (case (get-in warehouse-map next-location)
+    (case (get-in warehouse next-location)
       \. true
       \# false
-      \O (recur next-location direction warehouse-map))))
+      \O (can-move? next-location direction warehouse)
+      (\[ \]) (if (is-direction-horizontal? direction)
+                (can-move? next-location direction warehouse)
+                (every? #(can-move? % direction warehouse)
+                        (box-locations next-location warehouse))))))
 
-(defn move [location direction warehouse-map]
+(defn move [location direction warehouse]
   (let [next-location (update-location location direction)]
-    (-> (case (get-in warehouse-map next-location)
-          \. warehouse-map
-          \O (move next-location direction warehouse-map))
-        (assoc-in next-location (get-in warehouse-map location))
+    (-> (case (get-in warehouse next-location)
+          \. warehouse
+          \O (move next-location direction warehouse)
+          (\[ \]) (if (is-direction-horizontal? direction)
+                    (move next-location direction warehouse)
+                    (->> (box-locations next-location warehouse)
+                         (reduce (fn [w l] (move l direction w)) warehouse))))
+        (assoc-in next-location (get-in warehouse location))
         (assoc-in location \.))))
 
-(defn apply-movement [{:keys [robot-location warehouse-map] :as state} movement]
+(defn apply-movement [{:keys [robot warehouse] :as state} movement]
   (let [direction (movement-to-direction movement)]
-    (if (can-move? robot-location direction warehouse-map)
-      {:warehouse-map  (move robot-location direction warehouse-map)
-       :robot-location (update-location robot-location direction)}
+    (if (can-move? robot direction warehouse)
+      {:warehouse (move robot direction warehouse)
+       :robot     (update-location robot direction)}
       state)))
 
-(defn gps-coordinates [warehouse-map]
+(defn gps-coordinates [warehouse]
   (mapcat (fn [[row-idx row]]
             (keep-indexed (fn [col-idx ch]
-                            (when (= ch \O)
+                            (when (or (= ch \O) (= ch \[))
                               (+ (* 100 row-idx) col-idx)))
                           row))
-          (map-indexed vector warehouse-map)))
+          (map-indexed vector warehouse)))
 
-(defn part1 [{:keys [warehouse-map movements]}]
-  (let [robot-location (find-robot-location warehouse-map)
-        initial-state {:warehouse-map warehouse-map :robot-location robot-location}
-        end-state (reduce apply-movement initial-state movements)
-        sum (apply + (gps-coordinates (end-state :warehouse-map)))]
-    sum))
+(defn scale-up-row [row]
+  (vec (mapcat (fn [ch] (case ch
+                          \# [\# \#]
+                          \O [\[ \]]
+                          \. [\. \.]
+                          \@ [\@ \.]))
+               row)))
+
+(defn scale-up [warehouse]
+  (mapv scale-up-row warehouse))
+
+(defn solve [{:keys [warehouse movements]}]
+  (let [robot (find-robot warehouse)
+        initial-state {:warehouse warehouse :robot robot}
+        end-state (reduce apply-movement initial-state movements)]
+    (apply + (gps-coordinates (end-state :warehouse)))))
+
+(defn part1 [input]
+  (solve input))
+
+(defn part2 [input]
+  (->> (update input :warehouse scale-up)
+       (solve)))
 
 (defn -main []
   (let [input (parse-input)]
-    (println "Part 1:" (part1 input))))
+    (println "Part 1:" (part1 input))
+    (println "Part 2:" (part2 input))))
