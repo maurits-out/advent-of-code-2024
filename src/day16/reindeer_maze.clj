@@ -23,35 +23,33 @@
 (defn is-end-tile? [tile maze]
   (= (get-in maze tile) \E))
 
-(defn rotate-clockwise [[tile direction]]
-  (let [updated-direction (mod (inc direction) 4)]
-    [tile updated-direction]))
+(defn rotate-clockwise [{:keys [direction] :as node}]
+  (assoc node :direction (mod (inc direction) 4)))
 
-(defn rotate-counterclockwise [[tile direction]]
-  (let [updated-direction (mod (dec direction) 4)]
-    [tile updated-direction]))
+(defn rotate-counterclockwise [{:keys [direction] :as node}]
+  (assoc node :direction (mod (dec direction) 4)))
 
-(defn move-forward [[[row column] direction]]
+(defn move-forward [{:keys [tile direction] :as node}]
   (let [[dr dc] (nth movement-delta direction)]
-    [[(+ row dr) (+ column dc)] direction]))
+    (assoc node :tile [(+ (first tile) dr) (+ (second tile) dc)])))
 
-(defn move-backward [[[row column] direction]]
+(defn move-backward [{:keys [tile direction] :as node}]
   (let [[dr dc] (nth movement-delta direction)]
-    [[(- row dr) (- column dc)] direction]))
+    (assoc node :tile [(- (first tile) dr) (- (second tile) dc)])))
 
-(defn get-outgoing-neighbors [node score maze]
+(defn get-outgoing-neighbors-with-score [node score maze]
   (let [clockwise [(rotate-clockwise node) (+ score 1000)]
         counterclockwise [(rotate-counterclockwise node) (+ score 1000)]
         forward [(move-forward node) (inc score)]]
-    (if (not= (get-in maze (ffirst forward)) \#)
+    (if (not= (get-in maze (:tile (first forward))) \#)
       [clockwise counterclockwise forward]
       [clockwise counterclockwise])))
 
-(defn get-incoming-neighbors [node score maze]
+(defn get-incoming-neighbors-with-score [node score maze]
   (let [clockwise [(rotate-clockwise node) (- score 1000)]
         counterclockwise [(rotate-counterclockwise node) (- score 1000)]
         backward [(move-backward node) (dec score)]]
-    (if (not= (get-in maze (ffirst backward)) \#)
+    (if (not= (get-in maze (:tile (first backward))) \#)
       [clockwise counterclockwise backward]
       [clockwise counterclockwise])))
 
@@ -60,24 +58,24 @@
                                (or (not current-score) (< score current-score)))) neighbors))
 
 (defn dijkstra [{:keys [maze start-tile]}]
-  (let [start-node [start-tile 0]]
+  (let [start-node {:tile start-tile :direction 0}]
     (loop [dist {start-node 0}
            queue (priority-map start-node 0)]
-      (let [[tile :as node] (first (peek queue))]
+      (let [{:keys [tile] :as node} (first (peek queue))]
         (if (is-end-tile? tile maze)
           {:dist dist :end-node node}
-          (let [neighbors (->> (get-outgoing-neighbors node (dist node) maze)
+          (let [neighbors (->> (get-outgoing-neighbors-with-score node (dist node) maze)
                                (filter-neighbors-with-better-score dist))]
             (recur (into dist neighbors) (into (pop queue) neighbors))))))))
 
 (defn count-tiles [end-node dist maze]
   (loop [queue [end-node]
-         acc #{(first end-node)}]
+         acc #{(:tile end-node)}]
     (if-let [node (first queue)]
-      (let [neighbors (->> (get-incoming-neighbors node (dist node) maze)
+      (let [neighbors (->> (get-incoming-neighbors-with-score node (dist node) maze)
                            (filter (fn [n] (= (dist (first n)) (second n)))))
-            new-nodes (map (fn [n] (first n)) neighbors)
-            tiles (map (fn [n] (first n)) new-nodes)]
+            new-nodes (map #(first %) neighbors)
+            tiles (map #(:tile %) new-nodes)]
         (recur (into (rest queue) new-nodes) (into acc tiles)))
       (count acc))))
 
