@@ -73,7 +73,7 @@
          acc #{(:tile end-node)}]
     (if-let [node (first queue)]
       (let [neighbors (->> (get-incoming-neighbors-with-score node (dist node) maze)
-                           (filter (fn [n] (= (dist (first n)) (second n)))))
+                           (filter (fn [[node score]] (= (dist node) score))))
             new-nodes (map #(first %) neighbors)
             tiles (map #(:tile %) new-nodes)]
         (recur (into (vec (rest queue)) new-nodes) (into acc tiles)))
