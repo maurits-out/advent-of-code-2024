@@ -76,7 +76,7 @@
                            (filter (fn [n] (= (dist (first n)) (second n)))))
             new-nodes (map #(first %) neighbors)
             tiles (map #(:tile %) new-nodes)]
-        (recur (into (rest queue) new-nodes) (into acc tiles)))
+        (recur (into (vec (rest queue)) new-nodes) (into acc tiles)))
       (count acc))))
 
 (defn -main []
