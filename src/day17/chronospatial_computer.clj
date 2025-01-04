@@ -71,6 +71,29 @@
                           out)]
         (recur updated-regs updated-ip updated-out)))))
 
+(defn is-correct? [a target]
+  (let [b1 (mod a 8)
+        b2 (bit-xor b1 5)
+        b3 (bit-xor b2 6)
+        c (bit-shift-right a b2)
+        b4 (bit-xor b3 c)]
+    (= (mod b4 8) target)))
+
+(defn find-initial-value [program idx current-a]
+  (if (neg? idx)
+    current-a
+    (some (fn [n] (let [updated-a (bit-or (bit-shift-left current-a 3) n)
+                        target (nth program idx)]
+                    (and (is-correct? updated-a target)
+                         (find-initial-value program (dec idx) updated-a)))) (range 8))))
+
+(defn part1 [input]
+  (execute-program input))
+
+(defn part2 [program]
+  (find-initial-value program (dec (count program)) 0))
+
 (defn -main []
   (let [input (parse-input)]
-    (println "Part 1:" (execute-program input))))
+    (println "Part 1:" (part1 input))
+    (println "Part 2:" (part2 (input :program)))))
