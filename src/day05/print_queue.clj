@@ -49,7 +49,7 @@
     (map first ordered-by-count-desc)))
 
 (defn part2 [{:keys [rules updates]}]
-  (->> (filter #(not (is-correctly-ordered? rules %)) updates)
+  (->> (remove #(is-correctly-ordered? rules %) updates)
        (map #(fix-update rules %))
        (map #(middle-page-number %))
        (apply +)))

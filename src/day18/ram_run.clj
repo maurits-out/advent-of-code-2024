@@ -34,7 +34,7 @@
       (if (= location target)
         step-count
         (let [neighbors (->> (get-neighbors location corrupted-byte-locations)
-                             (filter #(not (contains? visited %))))
+                             (remove #(contains? visited %)))
               new-nodes (map (fn [n] [n (inc step-count)]) neighbors)]
           (recur (into (subvec queue 1) new-nodes) (into visited neighbors)))))))
 
