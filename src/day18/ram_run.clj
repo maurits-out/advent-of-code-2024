@@ -3,6 +3,7 @@
             [clojure.string :as string]))
 
 (def size 70)
+(def start [0 0])
 (def target [size size])
 
 (defn parse-line [line]
@@ -24,8 +25,8 @@
                       (not (contains? corrupted-byte-locations location)))))))
 
 (defn part1 [corrupted-byte-locations]
-  (loop [queue [[[0 0] 0]]
-         visited #{[0 0]}]
+  (loop [queue [[start 0]]
+         visited #{start}]
     (let [[location step-count] (first queue)]
       (if (= location target)
         step-count
