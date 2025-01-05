@@ -76,7 +76,7 @@
                            (filter (fn [[node score]] (= (dist node) score))))
             new-nodes (map #(first %) neighbors)
             tiles (map #(:tile %) new-nodes)]
-        (recur (into (vec (rest queue)) new-nodes) (into acc tiles)))
+        (recur (into (subvec queue 1) new-nodes) (into acc tiles)))
       (count acc))))
 
 (defn -main []
