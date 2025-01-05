@@ -79,13 +79,15 @@
         b4 (bit-xor b3 c)]
     (= (mod b4 8) target)))
 
-(defn find-initial-value [program idx current-a]
+(defn find-initial-value [program idx a]
   (if (neg? idx)
-    current-a
-    (some (fn [n] (let [updated-a (bit-or (bit-shift-left current-a 3) n)
-                        target (nth program idx)]
-                    (and (is-correct? updated-a target)
-                         (find-initial-value program (dec idx) updated-a)))) (range 8))))
+    a
+    (first (filter identity (for [n (range 8)
+                                  :let [new-a (->> (bit-shift-left a 3)
+                                                   (bit-or n))
+                                        target (nth program idx)]
+                                  :when (is-correct? new-a target)]
+                              (find-initial-value program (dec idx) new-a))))))
 
 (defn part1 [input]
   (execute-program input))
