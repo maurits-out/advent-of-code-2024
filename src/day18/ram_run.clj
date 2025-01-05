@@ -19,7 +19,10 @@
        (set)))
 
 (defn get-neighbors [[current-x current-y] corrupted-byte-locations]
-  (->> [[current-x (dec current-y)] [(inc current-x) current-y] [current-x (inc current-y)] [(dec current-x) current-y]]
+  (->> [[current-x (dec current-y)]
+        [(inc current-x) current-y]
+        [current-x (inc current-y)]
+        [(dec current-x) current-y]]
        (filter (fn [[x y :as location]]
                  (and (<= 0 x size) (<= 0 y size)
                       (not (contains? corrupted-byte-locations location)))))))
