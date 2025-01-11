@@ -34,7 +34,7 @@
       (if (= location target)
         (set path)
         (let [neighbors (->> (get-neighbors location corrupted-byte-locations)
-                             (filter #(not (contains? visited %))))
+                             (remove #(contains? visited %)))
               updated-paths (map #(conj path %) neighbors)]
           (recur (into (subvec queue 1) updated-paths)
                  (into visited neighbors)))))))
