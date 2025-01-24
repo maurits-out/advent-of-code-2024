@@ -5,8 +5,8 @@
 (defn parse-input []
   (let [input (slurp (io/resource "day19.txt"))
         sections (string/split input #"\n\n")]
-    {:patterns (string/split (first sections) #", ")
-     :designs  (string/split-lines (second sections))}))
+    [(string/split (first sections) #", ")
+     (string/split-lines (second sections))]))
 
 (defn is-possible? [patterns design]
   (or (empty? design)
@@ -23,17 +23,17 @@
                                     (count-different-ways patterns (subs design (count p))))))
                     (apply +))))))
 
-(defn part1 [{:keys [patterns designs]}]
+(defn part1 [patterns designs]
   (->> designs
        (filter (partial is-possible? patterns))
        (count)))
 
-(defn part2 [{:keys [patterns designs]}]
+(defn part2 [patterns designs]
   (->> designs
        (map (partial count-different-ways patterns))
        (apply +)))
 
 (defn -main []
-  (let [input (parse-input)]
-    (println "Part 1:" (part1 input))
-    (println "Part 2:" (part2 input))))
+  (let [[patterns designs] (parse-input)]
+    (println "Part 1:" (part1 patterns designs))
+    (println "Part 2:" (part2 patterns designs))))
